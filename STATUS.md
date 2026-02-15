@@ -31,6 +31,7 @@
 - [x] Import script for reminders/decisions/tasks
 - [x] TypeScript types
 - [x] UI tiles for Limitless data
+- [x] **UI for adding manual entries (Reminders, Decisions, Tasks)**
 - [x] 125 reminders ready to import
 
 #### Timeline View (New)
@@ -46,13 +47,18 @@
 - [x] Import documentation
 - [x] Ready for Telegram/ChatGPT/Signal/WhatsApp
 
+#### SaaS Prep (New)
+- [x] Multi-tenant migration script (`003`) created
+- [x] Secure RLS policies defined
+
 ### 🚧 Pending (Manual Steps)
 
 #### Database
 - [ ] Apply migration: `migrations/002_add_limitless_tables.sql`
+- [ ] Apply migration: `migrations/003_add_multi_tenant_support.sql`
   - **Action:** Run in Supabase SQL Editor
-  - **Time:** 2 minutes
-  - **Status:** SQL file ready, waiting for execution
+  - **Time:** 5 minutes
+  - **Status:** SQL files ready, waiting for execution
 
 #### Data Import
 - [ ] Import Limitless reminders
