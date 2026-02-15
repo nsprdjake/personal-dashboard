@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://kxqrsdicrayblwpczxsy.supabase.co",
+    "MEMORY_DIR": "/Users/jack/.openclaw/workspace/memory"
+  }
+}
