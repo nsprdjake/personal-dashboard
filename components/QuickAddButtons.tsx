@@ -64,6 +64,24 @@ export default function QuickAddButtons({ onAdd, onRefresh }: QuickAddButtonsPro
       >
         ⏰ Log Hours
       </button>
+      <button
+        onClick={() => onAdd('limitless_reminders')}
+        className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+      >
+        📋 Add Reminder
+      </button>
+      <button
+        onClick={() => onAdd('limitless_decisions')}
+        className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+      >
+        🤔 Add Decision
+      </button>
+      <button
+        onClick={() => onAdd('limitless_tasks')}
+        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium transition-all"
+      >
+        📝 Add Task
+      </button>
     </div>
   );
 }

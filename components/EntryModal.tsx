@@ -16,7 +16,15 @@ export default function EntryModal({ type, onClose, onSave }: EntryModalProps) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSave(formData);
+    const dataToSave = { ...formData };
+    
+    // Map date to due_date for reminders
+    if (type === 'limitless_reminders') {
+      dataToSave.due_date = dataToSave.date;
+      delete dataToSave.date;
+    }
+    
+    onSave(dataToSave);
   }
 
   function renderFormFields() {
@@ -233,6 +241,82 @@ export default function EntryModal({ type, onClose, onSave }: EntryModalProps) {
               />
               <span>Billable</span>
             </label>
+          </>
+        );
+
+      case 'limitless_reminders':
+        return (
+          <>
+            <input
+              type="text"
+              placeholder="Reminder Title"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              onChange={(e) => setFormData({ ...formData, title: e.target.value, status: 'active', source: 'manual' })}
+              required
+            />
+            <textarea
+              placeholder="Notes (optional)"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              rows={3}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            />
+          </>
+        );
+
+      case 'limitless_decisions':
+        return (
+          <>
+            <textarea
+              placeholder="What did you decide?"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              rows={3}
+              onChange={(e) => setFormData({ ...formData, decision_text: e.target.value, source: 'manual' })}
+              required
+            />
+            <textarea
+              placeholder="Context / Reasoning"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              rows={2}
+              onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+            />
+            <div>
+              <label className="block text-sm font-medium mb-2">Impact Rating (1-5)</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                className="w-full"
+                onChange={(e) => setFormData({ ...formData, impact_rating: parseInt(e.target.value) })}
+              />
+            </div>
+          </>
+        );
+
+      case 'limitless_tasks':
+        return (
+          <>
+            <input
+              type="text"
+              placeholder="Task Description"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              onChange={(e) => setFormData({ ...formData, task_text: e.target.value, source: 'manual' })}
+              required
+            />
+            <select
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            >
+              <option value="normal">Normal Priority</option>
+              <option value="high">High Priority</option>
+              <option value="urgent">Urgent</option>
+              <option value="low">Low Priority</option>
+            </select>
+            <textarea
+              placeholder="Context (optional)"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500"
+              rows={2}
+              onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+            />
           </>
         );
 
