@@ -1,59 +1,86 @@
-# Jake's Personal Dashboard
+# LifeOS - Your Life Operating System
 
-A beautiful, fully interactive life tracking dashboard built with Next.js and Supabase.
+A comprehensive life tracking and analytics platform built with Next.js and Supabase. Track everything that matters: daily habits, decisions, conversations, work, health, and insights - all in one beautiful dashboard.
 
-## Features
+## 🌟 Features
 
-✅ **Clickable stat tiles** - View full history of entries with dates  
-✅ **Manual entry forms** - Add Bailey walks, meals, wins, challenges, mood, work hours  
-✅ **Quick-add buttons** - One-click logging for common activities  
-✅ **Supabase backend** - All data stored in PostgreSQL database  
-✅ **Auto-sync** - Automatically parse nightly conversation check-ins from memory files  
-✅ **Beautiful design** - Modern glassmorphism UI with smooth animations  
-✅ **Mobile responsive** - Works perfectly on all devices  
-✅ **Charts & graphs** - Visualize trends over time with Recharts  
-✅ **View modes** - Daily, weekly, and monthly aggregate views  
-✅ **Goal tracking** - Set and track progress toward your goals  
+### Core Tracking
+✅ **Bailey Walks** - Dog walking logs with duration, distance, notes  
+✅ **Meals** - Food tracking with health ratings, calories, locations  
+✅ **Wins & Challenges** - Celebrate successes and track obstacles  
+✅ **Mood Tracking** - Daily mood, energy, and stress levels  
+✅ **Work Hours** - Time tracking with project tags  
+✅ **Goals** - Set and track progress toward your goals  
 
-## Database Schema
+### Limitless Integration
+✨ **AI Reminders** - Import and manage reminders from Limitless AI  
+✨ **Decisions** - Track important decisions with context  
+✨ **Tasks** - Task management with completion tracking  
+✨ **Transcripts** - Link to conversation transcripts  
 
-Tables:
-- `bailey_walks` - Dog walking logs with duration, distance, notes
-- `meals` - Meal tracking with type, location, calories, health rating
-- `wins` - Accomplishments with category and impact rating
-- `challenges` - Problems/obstacles with severity and resolution tracking
-- `mood_entries` - Daily mood, energy, and stress levels
-- `work_hours` - Time tracking with project, description, billable flag
-- `goals` - Goal setting with progress tracking
+### Conversations (Coming Soon)
+💬 **Unified Timeline** - All your conversations in one place  
+💬 **Import Tools** - Telegram, ChatGPT, Signal, WhatsApp support  
 
-## Setup
+### Unified Timeline
+📅 **Everything in one view** - See all life events chronologically  
+🔍 **Search & Filter** - Find anything instantly  
+📊 **Rich Analytics** - Charts, trends, and insights  
 
-1. **Apply database schema:**
-   ```bash
-   # Copy contents of supabase-schema.sql
-   # Paste into Supabase SQL Editor
-   # Run the migration
-   ```
+## 🚀 Quick Start
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+See [QUICKSTART.md](./QUICKSTART.md) for detailed setup instructions.
 
-3. **Configure environment:**
-   - Copy `.env.local` and update with your Supabase credentials
+```bash
+# Clone and install
+git clone <your-repo>
+cd lifeos
+npm install
 
-4. **Run development server:**
-   ```bash
-   npm run dev
-   ```
+# Configure environment
+cp .env.local.example .env.local
+# Edit .env.local with your Supabase credentials
 
-5. **Auto-sync memory files:**
-   ```bash
-   npm run sync-memory
-   ```
+# Apply database schema
+# Copy supabase-schema.sql into Supabase SQL Editor and run
 
-## Auto-Sync from Nightly Check-ins
+# Start development
+npm run dev
+```
+
+Visit `http://localhost:3000`
+
+## 📦 Database Schema
+
+### Core Tables
+- `bailey_walks` - Dog walking logs
+- `meals` - Meal tracking
+- `wins` - Accomplishments
+- `challenges` - Problems/obstacles
+- `mood_entries` - Mood tracking
+- `work_hours` - Time tracking
+- `goals` - Goal setting
+
+### Limitless Tables
+- `limitless_reminders` - AI-generated reminders
+- `limitless_decisions` - Decision tracking
+- `limitless_tasks` - Task management
+- `limitless_transcripts` - Conversation transcript metadata
+
+### Future Tables
+- `conversations` - Unified conversation history (Telegram, ChatGPT, etc.)
+
+## 🔧 Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Database:** Supabase (PostgreSQL)
+- **Styling:** Tailwind CSS
+- **Charts:** Recharts
+- **Icons:** Lucide React
+- **Deployment:** Vercel
+- **Auto-sync:** Node.js script parsing memory files
+
+## 📊 Auto-Sync from Memory Files
 
 The dashboard automatically parses your daily memory files (`memory/YYYY-MM-DD.md`) and extracts:
 
@@ -63,65 +90,27 @@ The dashboard automatically parses your daily memory files (`memory/YYYY-MM-DD.m
 - Challenges (⛔ warnings, "stuck", "blocked", "issue")
 - Work hours (mentions of hours worked)
 
-### Setting up auto-sync cron:
-
-Add to your crontab:
 ```bash
-# Run every night at 1 AM
-0 1 * * * cd /path/to/personal-dashboard && npm run sync-memory
-```
-
-Or trigger manually via API:
-```bash
-curl -X POST https://pd.nsprd.com/api/sync
-```
-
-## Deployment
-
-### Vercel
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `MEMORY_DIR` (path to memory files)
-
-4. Deploy!
-
-### Custom Domain
-
-Point `pd.nsprd.com` to your Vercel deployment:
-```bash
-# Add CNAME record in DNS:
-pd.nsprd.com -> cname.vercel-dns.com
-```
-
-## Tech Stack
-
-- **Framework:** Next.js 15 (App Router)
-- **Database:** Supabase (PostgreSQL)
-- **Styling:** Tailwind CSS
-- **Charts:** Recharts
-- **Deployment:** Vercel
-- **Auto-sync:** Node.js script parsing memory files
-
-## Development
-
-```bash
-# Run dev server
-npm run dev
-
-# Build for production
-npm run build
-
 # Run sync manually
 npm run sync-memory
+
+# Or set up cron (runs every night at 1 AM)
+0 1 * * * cd /path/to/lifeos && npm run sync-memory
 ```
 
-## Roadmap
+## 🌐 Deployment
 
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment guide.
+
+Quick deploy to Vercel:
+1. Push to GitHub
+2. Import in Vercel
+3. Add environment variables
+4. Deploy!
+
+## 🛣️ Roadmap
+
+### ✅ Completed
 - [x] Interactive dashboard with clickable tiles
 - [x] Manual entry forms for all trackers
 - [x] Quick-add buttons
@@ -129,12 +118,32 @@ npm run sync-memory
 - [x] Auto-sync from memory files
 - [x] Charts and trends
 - [x] Goal tracking
+- [x] Limitless data integration
+- [x] Unified timeline view
+
+### 🚧 In Progress
+- [ ] Conversations import (Telegram, ChatGPT)
+- [ ] Advanced filtering and search
+- [ ] Export features (CSV, PDF)
+
+### 💡 Future Ideas
 - [ ] Mobile app (React Native)
-- [ ] Push notifications for reminders
-- [ ] Integration with wearables (Apple Health, Fitbit)
+- [ ] Push notifications
+- [ ] Wearables integration (Apple Health, Fitbit)
 - [ ] AI insights and recommendations
-- [ ] Export data (CSV, PDF reports)
+- [ ] Multi-user support (SaaS version)
+- [ ] Team collaboration features
+- [ ] Public API
+- [ ] Zapier/IFTTT integrations
 
-## License
+## 📝 License
 
-Private project for Jake
+Private project for Jake. Future SaaS potential.
+
+## 🤝 Contributing
+
+This is currently a personal project, but open to collaboration as it evolves into a product.
+
+---
+
+Built with ❤️ by Jake

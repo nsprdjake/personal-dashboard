@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { BaileyWalk, Meal, Win, Challenge, MoodEntry, WorkHours, Goal } from '@/lib/supabase';
+import type { BaileyWalk, Meal, Win, Challenge, MoodEntry, WorkHours, Goal, LimitlessReminder, LimitlessDecision, LimitlessTask, Conversation } from '@/lib/supabase';
 import StatTile from '@/components/StatTile';
 import QuickAddButtons from '@/components/QuickAddButtons';
 import EntryModal from '@/components/EntryModal';
 import TrendChart from '@/components/TrendChart';
 import GoalProgress from '@/components/GoalProgress';
+import Timeline from '@/components/Timeline';
 import { format, subDays, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 type ViewMode = 'daily' | 'weekly' | 'monthly';
@@ -21,11 +22,16 @@ export default function Dashboard() {
   const [moodEntries, setMoodEntries] = useState<MoodEntry[]>([]);
   const [workHours, setWorkHours] = useState<WorkHours[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [reminders, setReminders] = useState<LimitlessReminder[]>([]);
+  const [decisions, setDecisions] = useState<LimitlessDecision[]>([]);
+  const [tasks, setTasks] = useState<LimitlessTask[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<string>('');
   const [selectedEntries, setSelectedEntries] = useState<any[]>([]);
   const [showEntriesList, setShowEntriesList] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   useEffect(() => {
     fetchAllData();
@@ -34,7 +40,10 @@ export default function Dashboard() {
   async function fetchAllData() {
     setLoading(true);
     try {
-      const [walksRes, mealsRes, winsRes, challengesRes, moodRes, hoursRes, goalsRes] = await Promise.all([
+      const [
+        walksRes, mealsRes, winsRes, challengesRes, moodRes, hoursRes, goalsRes,
+        remindersRes, decisionsRes, tasksRes, conversationsRes
+      ] = await Promise.all([
         supabase.from('bailey_walks').select('*').order('date', { ascending: false }),
         supabase.from('meals').select('*').order('date', { ascending: false }),
         supabase.from('wins').select('*').order('date', { ascending: false }),
@@ -42,6 +51,10 @@ export default function Dashboard() {
         supabase.from('mood_entries').select('*').order('date', { ascending: false }),
         supabase.from('work_hours').select('*').order('date', { ascending: false }),
         supabase.from('goals').select('*').order('created_at', { ascending: false }),
+        supabase.from('limitless_reminders').select('*').order('created_at', { ascending: false }),
+        supabase.from('limitless_decisions').select('*').order('date', { ascending: false }),
+        supabase.from('limitless_tasks').select('*').order('date', { ascending: false }),
+        supabase.from('conversations').select('*').order('timestamp', { ascending: false }),
       ]);
 
       if (walksRes.data) setBaileyWalks(walksRes.data);
@@ -51,6 +64,10 @@ export default function Dashboard() {
       if (moodRes.data) setMoodEntries(moodRes.data);
       if (hoursRes.data) setWorkHours(hoursRes.data);
       if (goalsRes.data) setGoals(goalsRes.data);
+      if (remindersRes.data) setReminders(remindersRes.data);
+      if (decisionsRes.data) setDecisions(decisionsRes.data);
+      if (tasksRes.data) setTasks(tasksRes.data);
+      if (conversationsRes.data) setConversations(conversationsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -149,26 +166,38 @@ export default function Dashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-            🎯 Jake's Life Dashboard
+            🧠 LifeOS
           </h1>
-          <p className="text-purple-200 text-lg">Track your daily habits, wins, and progress</p>
+          <p className="text-purple-200 text-lg">Your Life Operating System - Everything in one place</p>
         </div>
 
         {/* View Mode Toggle */}
-        <div className="mb-6 flex gap-2">
-          {(['daily', 'weekly', 'monthly'] as ViewMode[]).map(mode => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                viewMode === mode
-                  ? 'bg-white text-purple-900'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              {mode.charAt(0).toUpperCase() + mode.slice(1)}
-            </button>
-          ))}
+        <div className="mb-6 flex gap-2 items-center justify-between flex-wrap">
+          <div className="flex gap-2">
+            {(['daily', 'weekly', 'monthly'] as ViewMode[]).map(mode => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  viewMode === mode
+                    ? 'bg-white text-purple-900'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowTimeline(!showTimeline)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              showTimeline
+                ? 'bg-white text-purple-900'
+                : 'bg-white/20 text-white hover:bg-white/30'
+            }`}
+          >
+            {showTimeline ? '📊 Dashboard' : '📅 Timeline'}
+          </button>
         </div>
 
         {/* Quick Add Buttons */}
@@ -218,53 +247,85 @@ export default function Dashboard() {
             subtitle={`${viewMode} total`}
             onClick={() => openEntriesList('work_hours', workHours)}
           />
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <TrendChart
-            title="Bailey Walks Trend"
-            data={filtered.baileyWalks}
-            dataKey="date"
-            valueKey="duration_minutes"
-            color="#8b5cf6"
+          <StatTile
+            emoji="📋"
+            label="Reminders"
+            value={reminders.filter(r => !r.completed).length}
+            subtitle={`${reminders.filter(r => r.completed).length} completed`}
+            onClick={() => openEntriesList('reminders', reminders)}
           />
-          <TrendChart
-            title="Mood & Energy Levels"
-            data={filtered.moodEntries}
-            dataKey="date"
-            valueKey="mood_score"
-            secondaryKey="energy_level"
-            color="#06b6d4"
+          <StatTile
+            emoji="💬"
+            label="Conversations"
+            value={conversations.length}
+            subtitle={conversations.length > 0 ? 'Coming soon!' : 'No data yet'}
+            onClick={() => alert('Conversations import coming soon! Will support Telegram, ChatGPT, Signal, WhatsApp.')}
           />
         </div>
 
-        {/* Goals */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">🎯 Active Goals</h2>
-          <div className="space-y-4">
-            {goals.filter(g => g.status === 'active').map(goal => (
-              <GoalProgress key={goal.id} goal={goal} />
-            ))}
-            {goals.filter(g => g.status === 'active').length === 0 && (
-              <p className="text-purple-200">No active goals. Set some to track your progress!</p>
-            )}
-          </div>
-        </div>
+        {showTimeline ? (
+          /* Timeline View */
+          <Timeline
+            baileyWalks={baileyWalks}
+            meals={meals}
+            wins={wins}
+            challenges={challenges}
+            moodEntries={moodEntries}
+            workHours={workHours}
+            reminders={reminders}
+            decisions={decisions}
+            tasks={tasks}
+            conversations={conversations}
+          />
+        ) : (
+          <>
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <TrendChart
+                title="Bailey Walks Trend"
+                data={filtered.baileyWalks}
+                dataKey="date"
+                valueKey="duration_minutes"
+                color="#8b5cf6"
+              />
+              <TrendChart
+                title="Mood & Energy Levels"
+                data={filtered.moodEntries}
+                dataKey="date"
+                valueKey="mood_score"
+                secondaryKey="energy_level"
+                color="#06b6d4"
+              />
+            </div>
 
-        {/* Recent Wins */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
-          <h2 className="text-2xl font-bold text-white mb-4">🎉 Recent Wins</h2>
-          <div className="space-y-3">
-            {filtered.wins.slice(0, 5).map(win => (
-              <div key={win.id} className="bg-white/10 rounded-lg p-4">
-                <div className="text-purple-200 text-sm">{format(new Date(win.date), 'MMM dd, yyyy')}</div>
-                <div className="text-white font-medium">{win.title}</div>
-                {win.description && <div className="text-purple-200 text-sm mt-1">{win.description}</div>}
+            {/* Goals */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">🎯 Active Goals</h2>
+              <div className="space-y-4">
+                {goals.filter(g => g.status === 'active').map(goal => (
+                  <GoalProgress key={goal.id} goal={goal} />
+                ))}
+                {goals.filter(g => g.status === 'active').length === 0 && (
+                  <p className="text-purple-200">No active goals. Set some to track your progress!</p>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+
+            {/* Recent Wins */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+              <h2 className="text-2xl font-bold text-white mb-4">🎉 Recent Wins</h2>
+              <div className="space-y-3">
+                {filtered.wins.slice(0, 5).map(win => (
+                  <div key={win.id} className="bg-white/10 rounded-lg p-4">
+                    <div className="text-purple-200 text-sm">{format(new Date(win.date), 'MMM dd, yyyy')}</div>
+                    <div className="text-white font-medium">{win.title}</div>
+                    {win.description && <div className="text-purple-200 text-sm mt-1">{win.description}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modals */}

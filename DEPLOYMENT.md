@@ -1,93 +1,106 @@
-# Deployment Guide - Personal Dashboard
+# LifeOS - Deployment Guide
 
-## Step 1: Apply Database Schema to Supabase
+Deploy LifeOS to production with Vercel in minutes.
 
-1. Go to [Supabase Dashboard](https://supabase.com/dashboard/project/kxqrsdicrayblwpczxsy)
-2. Click **SQL Editor** in the left sidebar
-3. Click **New Query**
-4. Copy the entire contents of `supabase-schema.sql`
-5. Paste into the SQL editor
-6. Click **Run** (or press Cmd+Enter)
-7. Verify tables were created (check under Database → Tables)
+## Deployment Options
 
-Expected tables:
-- `bailey_walks`
-- `meals`
-- `wins`
-- `challenges`
-- `mood_entries`
-- `work_hours`
-- `goals`
+- **Vercel** (Recommended) - Zero-config Next.js deployment
+- **Netlify** - Alternative with similar features
+- **Self-hosted** - Docker or VPS deployment
 
-## Step 2: Deploy to Vercel
+This guide covers Vercel deployment.
 
-### Option A: Vercel Dashboard (Recommended)
+## Prerequisites
 
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click **Add New** → **Project**
-3. Import the `personal-dashboard` repository from GitHub
-4. Configure project:
-   - **Framework Preset:** Next.js
-   - **Root Directory:** `./`
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `.next`
+- GitHub account
+- Vercel account (free tier works)
+- Supabase project already set up
+- Domain name (optional)
 
-5. **Add Environment Variables:**
-   ```
-   NEXT_PUBLIC_SUPABASE_URL = https://kxqrsdicrayblwpczxsy.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cXJzZGljcmF5Ymx3cGN6eHN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcxODcyMTgsImV4cCI6MjAyMjc2MzIxOH0.QbH7KFR_-tnrC6vVi2DxV-G0j6v4q5q3sKW1vX8wXqA
-   SUPABASE_SERVICE_ROLE_KEY = [Get from Supabase Dashboard → Settings → API]
-   MEMORY_DIR = /Users/jack/.openclaw/workspace/memory
-   ```
-
-6. Click **Deploy**
-7. Wait for deployment to complete (~2-3 minutes)
-8. Get your deployment URL (e.g., `personal-dashboard-xxx.vercel.app`)
-
-### Option B: Vercel CLI
+## Step 1: Push to GitHub
 
 ```bash
-cd ~/.openclaw/workspace/personal-dashboard
-vercel login  # Login to your Vercel account
-vercel --prod # Deploy to production
+cd lifeos
+
+# Initialize git if not already done
+git init
+git add .
+git commit -m "Initial LifeOS setup"
+
+# Create a new GitHub repo, then:
+git remote add origin https://github.com/yourusername/lifeos.git
+git branch -M main
+git push -u origin main
 ```
 
-## Step 3: Configure Custom Domain (pd.nsprd.com)
+## Step 2: Import to Vercel
 
-1. In Vercel project settings, go to **Domains**
-2. Add custom domain: `pd.nsprd.com`
-3. Vercel will provide DNS records to add
+1. Go to [vercel.com](https://vercel.com)
+2. Click **New Project**
+3. Import your GitHub repository
+4. Vercel will auto-detect Next.js settings ✅
 
-4. Go to [DreamHost Panel](https://panel.dreamhost.com)
-5. Navigate to **Domains** → **Manage Domains**
-6. Find `nsprd.com` and click **DNS**
-7. Add CNAME record:
-   ```
-   Name: pd
-   Type: CNAME
-   Value: cname.vercel-dns.com
-   ```
+## Step 3: Configure Environment Variables
 
-8. Wait for DNS propagation (~10-30 minutes)
-9. Verify at https://pd.nsprd.com
-
-## Step 4: Set Up Auto-Sync (Optional)
-
-To automatically sync nightly conversation check-ins from memory files to the database:
-
-### Option A: Cron Job on Mac
+In Vercel project settings → Environment Variables, add:
 
 ```bash
-# Edit crontab
-crontab -e
+# Required
+NEXT_PUBLIC_SUPABASE_URL=https://kxqrsdicrayblwpczxsy.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
-# Add this line (runs every night at 1 AM):
-0 1 * * * cd /Users/jack/.openclaw/workspace/personal-dashboard && npm run sync-memory >> /tmp/dashboard-sync.log 2>&1
+# Optional (for auto-sync)
+MEMORY_DIR=/path/to/memory/files
 ```
 
-### Option B: Vercel Cron (Requires Pro Plan)
+💡 **Tip:** Add these to all environments (Production, Preview, Development)
 
-Add to `vercel.json`:
+## Step 4: Deploy!
+
+Click **Deploy** and Vercel will:
+- Install dependencies
+- Build your Next.js app
+- Deploy to a global CDN
+- Give you a live URL (e.g., `lifeos.vercel.app`)
+
+First deploy takes ~2 minutes.
+
+## Step 5: Custom Domain (Optional)
+
+### Option A: Vercel Domain
+Use the provided `*.vercel.app` subdomain for free.
+
+### Option B: Custom Domain
+
+1. In Vercel → Settings → Domains
+2. Add your domain (e.g., `lifeos.yourdomain.com`)
+3. Vercel will show DNS instructions
+4. Add CNAME record in your DNS:
+
+```
+CNAME  lifeos  cname.vercel-dns.com
+```
+
+5. Wait for DNS propagation (~5-30 minutes)
+6. Vercel auto-provisions SSL certificate ✅
+
+Example:
+```bash
+# DNS Configuration
+Type: CNAME
+Name: lifeos
+Value: cname.vercel-dns.com
+TTL: 3600
+```
+
+## Step 6: Enable Auto-Sync (Optional)
+
+If you want automatic memory file syncing in production:
+
+### Option A: Vercel Cron Jobs
+
+Create `vercel.json`:
 ```json
 {
   "crons": [{
@@ -97,86 +110,157 @@ Add to `vercel.json`:
 }
 ```
 
-### Option C: Manual Sync via API
+This hits your sync API endpoint daily at 1 AM.
+
+### Option B: External Cron
+
+Use a service like:
+- GitHub Actions (run workflow daily)
+- Zapier (scheduled task)
+- Your own server (curl the endpoint)
 
 ```bash
-curl -X POST https://pd.nsprd.com/api/sync
+# Example: GitHub Actions workflow
+# .github/workflows/sync.yml
+name: Daily Sync
+on:
+  schedule:
+    - cron: '0 1 * * *'
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger sync
+        run: curl -X POST https://lifeos.yourdomain.com/api/sync
 ```
 
-Or trigger from the OpenClaw gateway:
+## Verification Checklist
+
+After deployment:
+
+✅ Dashboard loads at your URL  
+✅ Can add and view entries  
+✅ Database connection works  
+✅ Custom domain resolves (if configured)  
+✅ SSL certificate is active  
+✅ Auto-sync endpoint works (test `/api/sync`)  
+
+## Monitoring & Maintenance
+
+### Vercel Analytics (Optional)
+
+Enable in Vercel dashboard for:
+- Page views
+- Performance metrics
+- User insights
+
+### Error Tracking
+
+Consider adding:
+- Sentry (error monitoring)
+- LogRocket (session replay)
+- Vercel Speed Insights
+
+### Database Backups
+
+Supabase automatically backs up your data, but you can also:
+
 ```bash
-openclaw remind "Sync personal dashboard" daily at 01:00
+# Export data periodically
+npm run export-data
 ```
 
-## Step 5: Test the Dashboard
+### Updates & Redeployment
 
-1. Visit https://pd.nsprd.com
-2. Try clicking on stat tiles (should show entry lists)
-3. Use quick-add buttons to add test entries
-4. Open entry modals and create full entries
-5. Check that data appears in Supabase Dashboard
-6. Verify charts are rendering correctly
+Any push to `main` branch auto-deploys to production:
+
+```bash
+git add .
+git commit -m "Add new feature"
+git push origin main
+# Vercel auto-deploys in ~1 minute
+```
+
+## Environment-Specific Configs
+
+### Production
+- Full error tracking
+- Analytics enabled
+- Caching optimized
+
+### Preview (branch deployments)
+- Test new features
+- Share with team
+- Each PR gets a unique URL
+
+### Development
+- Local only
+- Debug logging
+- Hot reload
 
 ## Troubleshooting
 
-### Build Fails
+### Build fails
+- Check Node.js version (needs 18+)
+- Verify all dependencies in `package.json`
+- Review build logs in Vercel dashboard
 
-- Check environment variables are set correctly in Vercel
-- Verify Supabase credentials are valid
-- Check build logs in Vercel deployment details
+### Database connection errors
+- Verify environment variables are set
+- Check Supabase project is active
+- Ensure `NEXT_PUBLIC_` prefix on client vars
 
-### Database Errors
+### Domain not resolving
+- Wait 30 minutes for DNS propagation
+- Verify CNAME record is correct
+- Clear browser cache / try incognito
 
-- Verify all tables were created (run schema.sql again)
-- Check RLS policies are enabled
-- Verify anon key has correct permissions
+### Auto-sync not working
+- Check `/api/sync` endpoint returns 200
+- Verify `MEMORY_DIR` path is accessible
+- Review Vercel function logs
 
-### Charts Not Rendering
+## Security Best Practices
 
-- Check browser console for errors
-- Verify `recharts` is installed in package.json
-- Check that data is being fetched from Supabase
+✅ Use environment variables (never commit secrets)  
+✅ Enable Supabase RLS policies  
+✅ Use `service_role` key only in API routes (server-side)  
+✅ Add rate limiting to sensitive endpoints  
+✅ Enable Vercel password protection (if needed)  
 
-### Auto-Sync Not Working
+## Performance Optimization
 
-- Verify `MEMORY_DIR` path is correct
-- Check that memory files exist and are readable
-- Run `npm run sync-memory` manually to test
-- Check cron logs: `tail -f /tmp/dashboard-sync.log`
+- **Static Generation:** Pre-render pages at build time
+- **ISR:** Incremental Static Regeneration for fresh data
+- **Edge Functions:** Deploy API routes to edge for low latency
+- **Image Optimization:** Use Next.js `<Image>` component
 
-## Updating the Dashboard
+## Cost Estimation
 
-```bash
-cd ~/.openclaw/workspace/personal-dashboard
-git pull origin main
-# Make changes
-git add .
-git commit -m "Update: [description]"
-git push origin main
-# Vercel auto-deploys on push to main
-```
+### Free Tier (Vercel + Supabase)
+- ✅ Up to 100GB bandwidth/month
+- ✅ Unlimited serverless function invocations
+- ✅ 500MB database storage
+- ✅ SSL certificate included
+- ✅ Preview deployments
 
-## Key Files
+**Total cost: $0/month** for personal use!
 
-- `app/page.tsx` - Main dashboard UI
-- `components/` - Reusable components (tiles, modals, charts)
-- `lib/supabase.ts` - Database client configuration
-- `scripts/sync-memory.ts` - Auto-sync script
-- `supabase-schema.sql` - Database schema
-
-## Support
-
-If issues arise:
-1. Check Vercel deployment logs
-2. Check Supabase logs (Dashboard → Logs)
-3. Check browser console for client-side errors
-4. Review this deployment guide
+### Scaling Up
+If you go SaaS and need more:
+- Vercel Pro: $20/month (team features, more bandwidth)
+- Supabase Pro: $25/month (more storage, backups)
 
 ## Next Steps
 
-- [ ] Apply database schema to Supabase
-- [ ] Deploy to Vercel
-- [ ] Configure custom domain (pd.nsprd.com)
-- [ ] Set up auto-sync cron
-- [ ] Test all features
-- [ ] Start tracking your life! 🎯
+1. ✅ Deploy to production
+2. 📊 Add analytics
+3. 🔒 Enable authentication (if going multi-user)
+4. 📱 Build mobile app
+5. 🚀 Launch as SaaS!
+
+---
+
+Questions? Check the [README.md](./README.md) or open an issue.
+
+Happy deploying! 🎉

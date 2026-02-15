@@ -1,103 +1,137 @@
-# Quick Start Guide 🚀
+# LifeOS - Quick Start Guide
 
-Your personal dashboard is ready! Here's how to get it live in 3 steps:
+Get LifeOS running in under 10 minutes!
 
-## 1️⃣ Apply Database Schema (5 minutes)
+## Prerequisites
 
-Open Supabase SQL Editor:
-https://supabase.com/dashboard/project/kxqrsdicrayblwpczxsy/sql
+- Node.js 18+ installed
+- Supabase account (free tier works great)
+- Git
 
-Copy/paste the contents of `supabase-schema.sql` and click **Run**.
+## Step 1: Clone and Install
 
-This creates 7 tables:
-- `bailey_walks` - Dog walking logs
-- `meals` - Meal tracking
-- `wins` - Accomplishments
-- `challenges` - Problems/obstacles
-- `mood_entries` - Daily mood tracking
-- `work_hours` - Time tracking
-- `goals` - Goal setting & progress
-
-## 2️⃣ Deploy to Vercel (3 minutes)
-
-1. Go to https://vercel.com/new
-2. Import `personal-dashboard` from GitHub
-3. Add these environment variables:
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=https://kxqrsdicrayblwpczxsy.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[From Supabase Dashboard]
-   SUPABASE_SERVICE_ROLE_KEY=[From Supabase Dashboard]
-   ```
-4. Click **Deploy**
-
-Get the keys from: https://supabase.com/dashboard/project/kxqrsdicrayblwpczxsy/settings/api
-
-## 3️⃣ Point Domain (2 minutes)
-
-In Vercel project settings → Domains:
-- Add: `pd.nsprd.com`
-- Copy the CNAME value
-
-In DreamHost DNS:
-- Add CNAME record: `pd` → `cname.vercel-dns.com`
-
-Wait 10-30 minutes for DNS propagation.
-
-## ✅ You're Done!
-
-Visit https://pd.nsprd.com and start tracking your life!
-
-### What You Can Do:
-
-📊 **Click stat tiles** to see full history  
-➕ **Quick-add buttons** for one-click logging  
-📝 **Manual entry forms** for detailed tracking  
-📈 **Charts & trends** to visualize progress  
-🎯 **Goal tracking** with progress bars  
-📅 **Daily/weekly/monthly** aggregate views  
-
-### Auto-Sync from Memory Files:
-
-The dashboard can automatically parse your nightly conversation check-ins!
-
-To enable:
 ```bash
-# Add to crontab (runs nightly at 1 AM):
-crontab -e
-# Add this line:
-0 1 * * * cd /Users/jack/.openclaw/workspace/personal-dashboard && npm run sync-memory
+git clone <your-repo-url>
+cd lifeos
+npm install
 ```
 
-Or trigger manually:
+## Step 2: Set Up Supabase
+
+1. **Create a new project** at [supabase.com](https://supabase.com)
+2. **Get your credentials:**
+   - Go to Settings → API
+   - Copy `Project URL` and `anon public` key
+   - Copy `service_role` key (for auto-sync)
+
+3. **Apply the schema:**
+   - Open Supabase SQL Editor
+   - Copy contents of `supabase-schema.sql`
+   - Paste and run the migration
+   - Verify all tables were created
+
+## Step 3: Configure Environment
+
+Create `.env.local`:
+
 ```bash
-cd ~/.openclaw/workspace/personal-dashboard
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://kxqrsdicrayblwpczxsy.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
+# Memory Sync (optional)
+MEMORY_DIR=/Users/jack/.openclaw/workspace/memory
+```
+
+## Step 4: Import Initial Data (Optional)
+
+If you have Limitless data to import:
+
+```bash
+# Import reminders, decisions, tasks from Limitless
+npm run import-limitless
+```
+
+This will read from `../limitless-integration/analysis/` and populate your database.
+
+## Step 5: Start Development Server
+
+```bash
+npm run dev
+```
+
+Visit http://localhost:3000 and you should see your LifeOS dashboard! 🎉
+
+## Step 6: Add Your First Data
+
+Click the **+ Add Entry** button or use the quick-add buttons to start tracking:
+
+- 🐕 Log a Bailey walk
+- 🍽️ Add a meal
+- ✅ Record a win
+- 😊 Track your mood
+
+## Optional: Auto-Sync from Memory Files
+
+If you keep daily memory notes, LifeOS can automatically extract entries:
+
+```bash
+# Test the sync
 npm run sync-memory
+
+# Set up cron for nightly sync (runs at 1 AM)
+crontab -e
+
+# Add this line:
+0 1 * * * cd /path/to/lifeos && npm run sync-memory
 ```
 
-This will scan `memory/YYYY-MM-DD.md` files and extract:
+The sync script parses your `memory/YYYY-MM-DD.md` files and extracts:
 - Bailey walks
 - Meals
-- Wins (✅, "accomplished", "shipped")
-- Challenges (⛔, "stuck", "blocked")
+- Wins
+- Challenges
 - Work hours
 
-### Next Level Features:
+## Verification Checklist
 
-Want to add more? Ideas for future enhancements:
-- Push notifications for reminders
-- Mobile app (React Native)
-- Apple Health / Fitbit integration
-- AI insights ("You're walking Bailey 2x more on weekends!")
-- Weekly digest emails
-- Data export (CSV, PDF reports)
+✅ Dashboard loads without errors  
+✅ Can click stat tiles to see entries  
+✅ Can add new entries via forms  
+✅ Charts render with data  
+✅ View mode toggle works (daily/weekly/monthly)  
+✅ Timeline view shows all events  
+
+## Troubleshooting
+
+### Database connection errors
+- Verify `.env.local` has correct credentials
+- Check Supabase project is active
+- Ensure RLS policies are created (schema includes them)
+
+### No data showing
+- Add test entries manually first
+- Check browser console for errors
+- Verify tables exist in Supabase
+
+### Auto-sync not working
+- Check `MEMORY_DIR` path is correct
+- Ensure memory files use correct format (`YYYY-MM-DD.md`)
+- Run `npm run sync-memory` manually to see errors
+
+## Next Steps
+
+1. **Customize your tracking** - Modify forms and tiles for your needs
+2. **Import Limitless data** - Run the import script
+3. **Set up auto-sync** - Configure cron for automatic updates
+4. **Deploy to production** - See [DEPLOYMENT.md](./DEPLOYMENT.md)
+5. **Explore timeline** - Use the unified timeline to see everything
 
 ## Need Help?
 
-See `DEPLOYMENT.md` for detailed instructions and troubleshooting.
+Check the main [README.md](./README.md) for more details, or open an issue on GitHub.
 
 ---
 
-**Built with:** Next.js 15, Supabase, Tailwind CSS, Recharts  
-**Deployed on:** Vercel  
-**Domain:** pd.nsprd.com  
-**Repo:** github.com/nsprdjake/personal-dashboard
+Happy tracking! 🚀

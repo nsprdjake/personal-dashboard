@@ -93,3 +93,74 @@ export type Goal = {
   updated_at: string;
   completed_at?: string;
 };
+
+// Limitless Integration Types
+export type LimitlessReminder = {
+  id: string;
+  title: string;
+  due_date?: string;
+  status: 'suggested' | 'active' | 'completed' | 'dismissed';
+  created_by: 'ai' | 'user';
+  source: string;
+  completed: boolean;
+  completed_at?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LimitlessDecision = {
+  id: string;
+  date: string;
+  decision_text: string;
+  context?: string;
+  source: string;
+  tags?: string[];
+  impact_rating?: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LimitlessTask = {
+  id: string;
+  date: string;
+  task_text: string;
+  context?: string;
+  completed: boolean;
+  completed_at?: string;
+  source: string;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  created_at: string;
+  updated_at: string;
+};
+
+export type LimitlessTranscript = {
+  id: string;
+  date: string;
+  title?: string;
+  word_count?: number;
+  summary?: string;
+  file_path?: string;
+  participants?: string[];
+  duration_minutes?: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Conversation = {
+  id: string;
+  date: string;
+  timestamp: string;
+  platform: 'telegram' | 'chatgpt' | 'signal' | 'whatsapp' | 'sms' | 'email';
+  conversation_id?: string;
+  sender?: string;
+  recipient?: string;
+  message_text?: string;
+  message_type: 'text' | 'image' | 'voice' | 'video' | 'file';
+  media_url?: string;
+  participants?: string[];
+  is_group: boolean;
+  tags?: string[];
+  created_at: string;
+  updated_at: string;
+};
